@@ -1,0 +1,3 @@
+## Exploring Unemployment by County in USA, 2009
+
+The ShinyApp is designed to explore the unemployment by county in USA, 2009. The Data can be loaded using data(unemp). Users can select the unemployment rate and window size to show the map and list of counties within the window. When clicking submit button, the app will move the unemployment window in the histogram of unimployment rate and the distribution of counties within this window in the USA map will be present. Users can also see the names of counties and states in the unemployment window by selecting the number of counties.The counties with high unemployment rate will be presented first.    

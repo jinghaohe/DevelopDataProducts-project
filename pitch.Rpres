@@ -1,0 +1,109 @@
+<style>
+
+.reveal section del {
+  color: blue;
+  font-weight:bold;
+  width: 100%;
+}
+
+</style>
+
+
+ShinyApp: Exploring Unemployment by County in USA, 2009
+========================================================
+transition: rotate
+author: Coursera Student
+date: `r date()`
+font-family: 'Helvetica'
+
+Overview
+========================================================
+
+The ShinyApp is designed to visualize the unemployment data by county in 2009. There are three tabpanels, including ~~Window~~, ~~Overall~~, and ~~About~~.
+- ~~Window~~ 
+ - Histogram of unimployment by county with a window.
+ - Viewlize map of counties in the unemployment window.
+ - List user-defined number of counties within the window. 
+- ~~Overall~~ 
+ - A map colored according to unemployment rate.
+- ~~About~~
+ - A brief note on the ShinyApp.
+
+
+Histogram of Unemployment
+========================================================
+left: 70%
+
+```{r,echo=FALSE, fig=TRUE, fig.width=8, fig.height=6.5}
+library(maps); library(ggplot2); library(Hmisc); data(unemp); data(county.fips)
+county.fips$polyname<-as.character(county.fips$polyname)
+county.fips$state<-sapply(strsplit(county.fips$polyname,","),function(x){capitalize(unlist(x)[1])})
+county.fips$county<-sapply(strsplit(county.fips$polyname,","),function(x){capitalize(unlist(x)[2])})
+unemp<-merge(county.fips,unemp,by="fips")[,c(-2)]
+unemprate <- 12; unempwin <- 1; v_winlft <- unemprate-unempwin; v_winrgt <- unemprate
+windat <- data.frame(vwin=c(v_winlft, v_winrgt))
+ggplot(unemp,aes(x=unemp)) + geom_histogram(color="white",fill="blue") +
+                             geom_vline(data=windat,aes(xintercept=vwin),color="red") +
+                             theme_bw() +
+                             labs(x="Unemployment Rate (%)" ) + labs(y="Number of Counties") +
+                             labs(title="Histogram")
+```
+
+***
+ 
+<small>
+Select unemployment rate and window size to view map/list of counties.
+
+Here is an example.
+* unimployment rate = 12 
+* window size = 1 
+</small>
+
+Counties in Unemploment Window 
+========================================================
+left: 50%
+
+<small>
+~~Map of Counties in Unemployment Window~~
+</small>
+
+```{r, echo=FALSE,fig=TRUE, fig.width=8, fig.height=8}
+indx <- unemp$unemp>=v_winlft & unemp$unemp<=v_winrgt 
+colorselect <- c("#F1EEF6", "#980043") 
+unemp$colorBuckets <- as.numeric(indx) + 1
+colorsmatched <- unemp$colorBuckets[match(county.fips$fips, unemp$fips)]     
+map("county", col=colorselect[colorsmatched], fill=TRUE, resolution=0, lty=1)
+title("Counties of Unemployment in the Selected Window, 2009")
+```
+
+***
+
+<small>
+~~List of Wanted Counties~~ 
+<small>
+<small><small>
+- input county number = 10
+</small></small>
+```{r,echo=FALSE,width=24}
+indxsort <- unlist(sort(unemp$unemp[indx],decreasing=TRUE,index.return=TRUE)[2])
+unempwin <- unemp[indx,][indxsort,c(3,2,5)]
+print(unempwin[1:10,],row.names=FALSE)
+```
+</small></small>
+
+Map Colored by Unemployment
+========================================================
+```{r,echo=FALSE,fig=TRUE, align='center', fig.width=15, fig.height=6}
+colors <- c("#F1EEF6", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#980043")
+unemp$colorBuckets <- as.numeric(cut(unemp$unemp, c(0, 2, 4, 6, 8, 10, 100)))
+colorsmatched <- unemp$colorBuckets[match(county.fips$fips, unemp$fips)] 
+map("county", col=colors[colorsmatched], fill=TRUE, resolution=0, lty=0)
+map("state", col="white", fill=FALSE, add=TRUE, lty=1, lwd=0.2)
+leg.txt <- c("<2%", "2-4%", "4-6%", "6-8%", "8-10%", ">10%")
+legend("bottomright", leg.txt, horiz = FALSE, fill = colors)  
+```
+
+~~Summary~~
+- Demonstrate ShinyApp to explore unemployment data. 
+- See map/list of counties in the window of histogram.    
+- Show colored map for overview of unemplotment.
